@@ -1,0 +1,23 @@
+{
+  "season": "示例：2026 9-12月",
+  "P1": [
+    {
+      "topic": "Work/Study",
+      "cat": "必考题",
+      "qs": ["Do you work or are you a student?", "What subjects are you studying?"]
+    },
+    {
+      "topic": "Hometown",
+      "cat": "必考题",
+      "qs": ["Where is your hometown?", "Do you like it?"]
+    }
+  ],
+  "P2": [
+    {
+      "topic": "A Person You Admire",
+      "cat": "新题",
+      "cues": ["Who this person is", "How you know him/her", "What he/she does", "And explain why you admire him/her"],
+      "p3": ["Whom do young people admire these days?", "Why do people need role models?"]
+    }
+  ]
+}

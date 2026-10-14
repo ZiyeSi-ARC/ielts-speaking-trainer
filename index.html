@@ -1,0 +1,772 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#A6192E">
+<title>IELTS Speaking Trainer</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<style>
+:root{
+  --red:#A6192E; --red-d:#8A1426; --red-l:#FCE9EC;
+  --ink:#231A1C; --ink-2:#6B5C60; --ink-3:#9C8E92;
+  --bg:#F7F3F1; --card:#FFFFFF; --line:#EADFDE;
+  --gold:#C9A227; --green:#1E8E5A;
+  --shadow:0 1px 2px rgba(35,26,28,.05), 0 6px 20px rgba(35,26,28,.06);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{-webkit-text-size-adjust:100%}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",Roboto,sans-serif;background:var(--bg);color:var(--ink);min-height:100vh;line-height:1.5}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+a{color:inherit}
+
+.hdr{background:linear-gradient(135deg,var(--red) 0%,var(--red-d) 100%);color:#fff;padding:16px 20px;position:sticky;top:0;z-index:20;box-shadow:0 2px 14px rgba(138,20,38,.25)}
+.hdr-top{display:flex;align-items:center;gap:12px}
+.hdr h1{font-size:19px;font-weight:700;letter-spacing:-.3px}
+.hdr .sub{font-size:12px;opacity:.85;margin-top:1px}
+.hdr .sp{flex:1}
+.gear{font-size:18px;opacity:.9;padding:6px;border-radius:8px;transition:.2s}
+.gear:hover{background:rgba(255,255,255,.14)}
+
+.wrap{max-width:640px;margin:0 auto;padding:12px 14px 90px}
+
+.tabs{display:flex;gap:6px;margin-bottom:12px;background:#fff;padding:6px;border-radius:14px;border:1px solid var(--line);box-shadow:var(--shadow)}
+.tb{flex:1;padding:10px 4px;border-radius:10px;font-size:13px;font-weight:600;color:var(--ink-2);transition:.18s;display:flex;flex-direction:column;align-items:center;line-height:1.1;gap:1px}
+.tb small{font-size:10px;font-weight:500;opacity:.7}
+.tb.on{background:var(--red);color:#fff;box-shadow:0 2px 8px rgba(166,25,46,.3)}
+
+.mbar{display:flex;align-items:center;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.seg{display:flex;background:#fff;border:1px solid var(--line);border-radius:20px;padding:3px;box-shadow:var(--shadow)}
+.seg button{padding:6px 14px;border-radius:16px;font-size:12px;font-weight:600;color:var(--ink-2);transition:.18s}
+.seg button.on{background:var(--red);color:#fff}
+.linkbtn{padding:7px 14px;border-radius:16px;border:1.5px solid #E5C7CB;background:#fff;color:var(--red);font-size:12px;font-weight:600;transition:.18s;margin-left:auto}
+.linkbtn:hover{background:var(--red-l)}
+.streak{margin-left:auto;font-size:12px;font-weight:700;color:var(--red);background:#fff;border:1.5px solid #E5C7CB;padding:6px 12px;border-radius:16px;white-space:nowrap}
+
+.card{background:var(--card);border-radius:16px;padding:20px;margin-bottom:12px;box-shadow:var(--shadow);border:1px solid var(--line)}
+.tl{font-size:11px;color:var(--red);font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-bottom:6px;display:flex;align-items:center;gap:8px}
+.tl .tag{background:var(--red-l);color:var(--red);padding:2px 8px;border-radius:8px;font-size:10px}
+.qn{font-size:11px;color:var(--ink-3);margin-bottom:4px}
+.qt{font-size:17px;font-weight:600;color:var(--ink);line-height:1.45}
+
+.cue{background:linear-gradient(135deg,#FFF8F0,#FBEEE4);border:1.5px dashed #D9B98C;border-radius:14px;padding:14px 16px;margin-top:12px;display:none}
+.cue .cue-title{font-size:12px;font-weight:700;color:#9A6B2F;margin-bottom:8px;letter-spacing:.3px}
+.cue ul{list-style:none;padding:0}
+.cue li{font-size:13px;color:#6B5540;padding:4px 0 4px 22px;position:relative}
+.cue li::before{content:"•";position:absolute;left:6px;color:#C9A227;font-weight:700}
+
+.timer{display:none;background:var(--card);border-radius:16px;padding:14px;margin-bottom:12px;text-align:center;border:1px solid var(--line);box-shadow:var(--shadow)}
+.timer.show{display:block}
+.timer .tlabel{font-size:11px;font-weight:700;color:var(--ink-3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:4px}
+.timer .tnum{font-size:46px;font-weight:800;font-variant-numeric:tabular-nums;color:var(--red);letter-spacing:-1px;line-height:1}
+.timer.warn .tnum{color:var(--gold)}
+.timer.danger .tnum{color:#D64545;animation:pulse .4s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+
+.controls{display:flex;gap:8px;margin-bottom:12px}
+.btn{flex:1;padding:12px 8px;border-radius:12px;font-size:13px;font-weight:700;transition:.15s;display:flex;flex-direction:column;align-items:center;gap:3px;line-height:1.1}
+.btn .ic{font-size:18px}
+.btn-primary{background:var(--red);color:#fff;box-shadow:0 2px 8px rgba(166,25,46,.3)}
+.btn-primary:hover{background:var(--red-d)}
+.btn-outline{background:#fff;color:var(--red);border:1.5px solid var(--red)}
+.btn-outline:hover{background:var(--red-l)}
+.btn-rec{background:#fff;color:var(--red);border:1.5px solid var(--red)}
+.btn-rec.rec{background:var(--red);color:#fff;animation:pulse 1s infinite}
+.btn-ai{background:#fff;color:var(--green);border:1.5px solid var(--green)}
+.btn-ai:hover{background:#EAF6F0}
+.btn-stop{background:#D64545;color:#fff}
+
+.panel{background:var(--card);border-radius:16px;margin-bottom:12px;box-shadow:var(--shadow);border:1px solid var(--line);overflow:hidden;display:none}
+.panel.show{display:block}
+.panel-head{display:flex;align-items:center;gap:8px;padding:12px 16px;background:#FAF7F6;border-bottom:1px solid var(--line);font-size:13px;font-weight:700;color:var(--ink)}
+.panel-head .sp{flex:1}
+.close{color:var(--ink-3);font-size:18px;padding:2px 6px;border-radius:6px}
+.close:hover{background:#eee}
+.panel-body{padding:14px 16px;font-size:13px;color:var(--ink)}
+
+.topicpanel .search{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;gap:8px}
+.topicpanel input{flex:1;padding:8px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;outline:none}
+.topicpanel input:focus{border-color:var(--red)}
+.catgrp{border-bottom:1px solid var(--line)}
+.cathdr{padding:9px 16px;font-size:12px;font-weight:700;color:var(--ink-2);background:#FBF9F8;cursor:pointer;display:flex;align-items:center;gap:6px;user-select:none}
+.cathdr .arr{font-size:9px;transition:.2s}
+.catgrp.folded .topicrow{display:none}
+.catgrp.folded .cathdr .arr{transform:rotate(-90deg)}
+.topicrow{padding:8px 16px 8px 26px;font-size:13px;cursor:pointer;color:var(--ink);display:flex;align-items:center;gap:7px;transition:.12s;border-bottom:1px solid #F5F0EF}
+.topicrow:hover{background:var(--red-l)}
+.topicrow.cur{background:var(--red-l);color:var(--red);font-weight:700;border-left:3px solid var(--red)}
+.topicrow .badge{font-size:10px;background:#EFE7E6;color:var(--ink-3);border-radius:6px;padding:1px 7px;margin-left:auto}
+
+.recs .ri{padding:10px 12px;border-bottom:1px solid #F0EAEA;font-size:12px}
+.recs .ri:last-child{border-bottom:none}
+.recs .ri-top{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.recs .ri-label{flex:1;color:var(--ink-2);font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.recs audio{width:100%;height:34px}
+.del{color:var(--red);font-weight:700;font-size:13px;padding:2px 8px;border-radius:6px}
+.del:hover{background:var(--red-l)}
+
+.ai-body .bandrow{display:flex;align-items:baseline;gap:10px;margin-bottom:12px}
+.band-num{font-size:40px;font-weight:800;color:var(--red);letter-spacing:-1px}
+.band-max{color:var(--ink-3);font-size:13px}
+.band-note{font-size:11px;color:var(--ink-3)}
+.ai-meta{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.chip{font-size:10px;font-weight:600;padding:3px 9px;border-radius:12px;background:#F1EBEA;color:var(--ink-2)}
+.ai-section{margin-bottom:12px}
+.ai-section h4{font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.ai-section p{font-size:13px;color:var(--ink);line-height:1.55}
+.ai-section ul{list-style:none;padding-left:0}
+.ai-section li{font-size:13px;padding:3px 0 3px 18px;position:relative;color:var(--ink)}
+.ai-section li::before{content:"→";position:absolute;left:2px;color:var(--gold);font-weight:700}
+.transcript{background:#F7F4F2;border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:13px;color:var(--ink-2);min-height:46px;margin-bottom:12px;white-space:pre-wrap}
+.stt-tip{font-size:11px;color:var(--ink-3);margin-top:6px}
+
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:12px 8px;text-align:center;box-shadow:var(--shadow)}
+.stat .v{font-size:22px;font-weight:800;color:var(--red);line-height:1.1}
+.stat .k{font-size:10px;color:var(--ink-3);margin-top:3px}
+.heatmap{display:flex;gap:3px;flex-wrap:wrap;padding:2px 0}
+.hm-day{width:14px;height:14px;border-radius:3px;background:#EFE9E8}
+.hm-day.d1{background:#F3C4CE}
+.hm-day.d2{background:#E58A9C}
+.hm-day.d3{background:#C23A52}
+.hm-day.d4{background:var(--red)}
+.hm-day.d5{background:#6E0E1E}
+.hm-legend{display:flex;align-items:center;gap:4px;font-size:10px;color:var(--ink-3);margin-top:8px}
+.hm-legend .hm-day{width:10px;height:10px}
+
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:100;opacity:0;transition:.3s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+
+.modal{position:fixed;inset:0;background:rgba(23,16,18,.5);z-index:50;display:none;align-items:flex-end;justify-content:center}
+.modal.show{display:flex}
+.sheet{background:#fff;width:100%;max-width:640px;border-radius:20px 20px 0 0;padding:20px 20px 28px;max-height:88vh;overflow:auto}
+.sheet h2{font-size:17px;margin-bottom:4px}
+.sheet .desc{font-size:12px;color:var(--ink-3);margin-bottom:16px}
+.field{margin-bottom:14px}
+.field label{display:block;font-size:12px;font-weight:700;color:var(--ink-2);margin-bottom:5px}
+.field input,.field textarea,.field select{width:100%;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;font-size:13px;outline:none;font-family:inherit}
+.field input:focus,.field textarea:focus,.field select:focus{border-color:var(--red)}
+.field .hint{font-size:11px;color:var(--ink-3);margin-top:4px;line-height:1.5}
+.row{display:flex;gap:10px}
+.row .btn{flex:1}
+.warn-box{background:#FFF7E6;border:1px solid #F0D48A;border-radius:10px;padding:10px 12px;font-size:12px;color:#8A6D2B;margin-bottom:14px;line-height:1.5}
+
+.ftr{text-align:center;padding:14px;font-size:11px;color:var(--ink-3);line-height:1.6}
+.kbd{display:inline-block;background:#EFE7E6;border:1px solid #E0D5D3;border-radius:5px;padding:0 6px;font-size:10px;color:var(--ink-2);margin:0 1px}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-top">
+    <div>
+      <h1>IELTS Speaking Trainer</h1>
+      <div class="sub" id="bankLabel">题库：2026 5–8 月 · 离线可用</div>
+    </div>
+    <div class="sp"></div>
+    <button class="gear" id="btnSettings" title="设置">⚙️</button>
+  </div>
+</header>
+
+<div class="wrap">
+
+  <div class="tabs" id="tabs">
+    <button class="tb on" data-part="1">Part 1<small id="p1count"></small></button>
+    <button class="tb" data-part="2">Part 2<small id="p2count"></small></button>
+    <button class="tb" data-part="3">Part 3<small id="p3count"></small></button>
+  </div>
+
+  <div class="mbar">
+    <div class="seg">
+      <button id="mSeq" class="on">顺序</button>
+      <button id="mRand">随机</button>
+    </div>
+    <button class="linkbtn" id="btnList">☰ 话题</button>
+    <span class="streak" id="streakBadge">🔥 连续 0 天</span>
+  </div>
+
+  <div class="timer" id="timerBox">
+    <div class="tlabel" id="timerLabel">准备时间</div>
+    <div class="tnum" id="timerNum">1:00</div>
+  </div>
+
+  <div class="card">
+    <div class="tl" id="tl"><span class="tag" id="catTag"></span><span id="tlText"></span></div>
+    <div class="qn" id="qn"></div>
+    <div class="qt" id="qt">点击下方按钮开始练习。</div>
+    <div class="cue" id="cue">
+      <div class="cue-title">YOU SHOULD SAY:</div>
+      <ul id="cuelist"></ul>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-primary" id="btnAsk"><span class="ic">🔊</span>读题</button>
+    <button class="btn btn-rec" id="btnRec"><span class="ic">🎙️</span>录音</button>
+    <button class="btn btn-ai" id="btnAI"><span class="ic">✨</span>AI 反馈</button>
+    <button class="btn btn-outline" id="btnNext"><span class="ic">→</span>下一题</button>
+  </div>
+
+  <div class="panel ai-body" id="aiPanel">
+    <div class="panel-head">✨ AI 反馈<span class="sp"></span><button class="close" id="btnAIClose">✕</button></div>
+    <div class="panel-body" id="aiContent">
+      <div class="transcript" id="transcriptBox">还没有内容。点「AI 反馈」会先让你说话并转写，然后自动评分。也可以直接在这里输入你的答案。</div>
+      <div id="aiResult"></div>
+    </div>
+  </div>
+
+  <div class="panel recs" id="recsPanel">
+    <div class="panel-head">🎙️ 我的录音<span class="sp"></span><button class="close" id="btnRecsClose">✕</button></div>
+    <div class="panel-body" id="recsList"></div>
+  </div>
+
+  <div class="panel topicpanel" id="topicPanel">
+    <div class="panel-head">☰ 话题列表<span class="sp"></span><button class="close" id="btnTopicClose">✕</button></div>
+    <div class="search"><input type="text" id="topicSearch" placeholder="搜索话题…"></div>
+    <div id="topicList"></div>
+  </div>
+
+  <div class="stats-grid" id="statsGrid">
+    <div class="stat"><div class="v" id="statToday">0</div><div class="k">今日练习</div></div>
+    <div class="stat"><div class="v" id="statTotal">0</div><div class="k">累计练习</div></div>
+    <div class="stat"><div class="v" id="statStreak">0</div><div class="k">连续天数</div></div>
+  </div>
+
+  <div class="card">
+    <div class="tl">🔥 近 90 天练习热力图</div>
+    <div class="heatmap" id="heatmap"></div>
+    <div class="hm-legend">
+      少 <span class="hm-day"></span><span class="hm-day d1"></span><span class="hm-day d2"></span><span class="hm-day d3"></span><span class="hm-day d4"></span><span class="hm-day d5"></span> 多（10 题满格）
+    </div>
+  </div>
+
+  <div class="ftr">
+    快捷键：<span class="kbd">空格</span> 读题 <span class="kbd">R</span> 录音 <span class="kbd">→</span> 下一题 <span class="kbd">1/2/3</span> 切 Part <span class="kbd">M</span> 模式
+    <br>核心功能离线可用 · 联网后可用 AI 反馈、语音识别、导入题库
+  </div>
+</div>
+
+<div class="modal" id="settingsModal">
+  <div class="sheet">
+    <h2>设置</h2>
+    <div class="desc">离线练习不需要任何配置。联网功能只需填一个 DeepSeek Key。</div>
+
+    <div class="warn-box">⚠️ 隐私：AI Key 只存在你自己的浏览器 localStorage，不经过任何服务器。不启用 AI 时，你的所有数据（录音、练习记录）都不离开本机。</div>
+
+    <div class="field">
+      <label>DeepSeek API Key</label>
+      <input type="password" id="inpKey" placeholder="sk-...">
+      <div class="hint">在 platform.deepseek.com 创建。用于 AI 打分、改进建议。留空则只用离线功能。</div>
+    </div>
+    <div class="field">
+      <label>语音识别（听写你说了什么）</label>
+      <select id="inpSTT">
+        <option value="web">浏览器自带（免费，推荐，需 Chrome/Edge）</option>
+        <option value="off">关闭（只用录音，不用转写）</option>
+      </select>
+      <div class="hint" id="sttSupportHint">检测中…</div>
+    </div>
+    <div class="field">
+      <label>朗读语速</label>
+      <select id="inpRate">
+        <option value="0.7">慢（0.7x）</option>
+        <option value="0.85" selected>正常（0.85x）</option>
+        <option value="1.0">快（1.0x）</option>
+      </select>
+    </div>
+    <div class="field">
+      <label>朗读声音（选最像真人的）</label>
+      <select id="inpVoice"><option value="">自动选择</option></select>
+      <div class="hint">优先选带 Google / Microsoft 的在线语音，比系统自带的更自然。切换后点一次「读题」试试效果。</div>
+    </div>
+    <div class="field">
+      <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="inpAutoRead" style="width:auto" checked> 切题后自动读题</label>
+      <div class="hint">关掉则每次切题后需要手动点「读题」。</div>
+    </div>
+
+    <h2 style="margin-top:20px">题库</h2>
+    <div class="field">
+      <label>导入题库（JSON）</label>
+      <input type="file" id="inpBankFile" accept=".json,application/json">
+      <div class="hint">支持换季题库。格式见 README 里的 <code>bank-template.json</code>。</div>
+    </div>
+    <div class="row">
+      <button class="btn btn-outline" id="btnExport">导出当前题库</button>
+      <button class="btn btn-outline" id="btnResetBank">恢复内置题库</button>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <button class="btn btn-outline" id="btnExportData">导出练习记录</button>
+      <button class="btn btn-outline" id="btnClearData">清空练习记录</button>
+    </div>
+
+    <div class="row" style="margin-top:18px">
+      <button class="btn btn-primary" id="btnSaveSettings">保存并关闭</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============ 题库数据（内置：2026 5-8 月）============ */
+var BANK = {
+  season: "2026 5-8月",
+  P1: [
+    {topic:"Work/Study",cat:"必考题",qs:["Do you work or are you a student?","What do you do?","Why did you choose to do this type of work?","Do you like your job? Why/Why not?","What do you find the most interesting about the work you do?","Will you need to do any more study for your job?","Where do you work?","Is it a good place to work?","Would you like the place where you work to make any changes?","What technology do you use at work?","What subjects are you studying?","Why did you choose to study this subject?","What do you like about your course?","What would you like to do after you finish your course?","Do you prefer to study in the mornings or in the afternoons?","Do you think you will miss being a student once you finish your studies?","What technology do you use when you study?","Are you enjoying your studies at the moment?"]},
+    {topic:"Hometown",cat:"必考题",qs:["Where is your hometown?","What kind of place is it?","How long have you lived there?","What is one of the best things about living there?","Is there anything you dislike about it?","Do you know many people who live nearby?","Do you have any relatives who still live in your hometown?","Do you often go back to visit your hometown?","Can you describe your hometown a little bit?","Do you like it?","Did you like living there?","Do you think you'll continue living there for a long time?"]},
+    {topic:"Home/Accommodation",cat:"必考题",qs:["Do you live in a house or an apartment?","Do you prefer living in a house or an apartment?","Do you live with anyone else?","Do you like the place you currently live in?","What is your favourite room in your house/apartment?","Would you like to change anything in your house/apartment?","Would you like to move to a different house/apartment in the future?","What do you think makes a place comfortable to live in?"]},
+    {topic:"The Area You Live In",cat:"必考题",qs:["Where are you living at the moment?","What kind of area is it?","How long have you lived there?","Do you know any of your neighbours?","What do you like about living there?","What changes have taken place in the area recently?","Would you like to change anything about your area?","Would you like to continue living there in the future?"]},
+    {topic:"The City You Live In",cat:"必考题",qs:["What city do you live in?","Do you like this city? Why?","How long have you lived in this city?","Are there big changes in this city?","Is this city your permanent residence?","Are there people of different ages living in this city?"]},
+    {topic:"Teachers",cat:"新题",qs:["Do you have a favorite teacher?","Do you want to be a teacher in the future?","Do you have a teacher from your past that you still remember?","Are you still in touch with your primary school teachers?","In what way has your favourite teacher helped you?"]},
+    {topic:"Social Media",cat:"新题",qs:["Have you ever posted anything on social media?","When did you start using social media?","Do you think you spend too much time on social media?","Do your friends use social media?","What do people often do on social media?"]},
+    {topic:"Music",cat:"新题",qs:["Do you like music?","What kinds of music do you listen to?","Do you prefer sad or happy music?","Does happy music make you feel more excited?","Have you taken any music classes?","Do you listen to music while doing other things?"]},
+    {topic:"Tidiness",cat:"新题",qs:["Do you like to keep things tidy?","Did you use to keep your room tidy as a child?","Are you a tidy person now?","What do you think of those who don't care about tidiness?","What do you think of those who are overly concerned about tidiness?"]},
+    {topic:"Websites",cat:"新题",qs:["What kinds of websites do you often visit?","What is your favourite website?","Are there any changes to the websites you often visit?","What kinds of websites are popular in your country?","Do you prefer getting information from websites or books?","Would you like to have your own website?"]},
+    {topic:"Watch",cat:"新题",qs:["Do you wear a watch?","Have you ever got a watch as a gift?","Why do some people wear expensive watches?","Do you think it is important to wear a watch? Why?"]},
+    {topic:"Shopping",cat:"新题",qs:["Do you like shopping?","How often do you go shopping?","Do you prefer online shopping or in-store shopping?","Do you compare prices when you shop?","Is it difficult for you to make choices when you shop?","Do you think expensive products are always better than cheaper ones?","Have you ever returned anything you bought online?"]},
+    {topic:"Feeling Bored",cat:"新题",qs:["Do you often feel bored?","Did you ever find school boring when you were a child?","What sort of things do you find most boring now?","What do you do to stop yourself feeling bored?","When would you feel bored?","What do you do when you feel bored?","Do you think childhood is boring or adulthood is boring?"]},
+    {topic:"Parks",cat:"新题",qs:["Did you like going to parks as a child?","Do you still like going to parks now?","Would you like to see more parks in your city?","Are there any parks you want to go to in the future?"]},
+    {topic:"Cars",cat:"新题",qs:["Did you enjoy traveling by car when you were a kid?","What types of cars do you like?","Do you prefer to be a driver or a passenger?","What do you usually do when there is a traffic jam?","Do you think car colours are important?"]},
+    {topic:"Outer Space and Stars",cat:"新题",qs:["Have you ever learnt about outer space and stars?","Do you enjoy watching science-fiction films set in space?","Do you want to know more about outer space?","Would you like to go into outer space in the future?"]},
+    {topic:"Science",cat:"新题",qs:["Do you like science?","When did you start to learn about science?","Which science subject is interesting to you?","What kinds of interesting things have you done with science?","Do you like watching science TV programs?","Do Chinese people often visit science museums?"]},
+    {topic:"Mirrors",cat:"新题",qs:["Do you like looking at yourself in the mirror? How often?","Have you ever bought mirrors?","Do you usually take a mirror with you?","Would you use mirrors to decorate your room?"]},
+    {topic:"Telling Jokes",cat:"新题",qs:["Are you good at telling jokes?","Do your friends like to tell jokes?","Do you like to watch comedies?","Have you ever watched a live show?","Are comedy shows popular in your country?"]},
+    {topic:"Headphones",cat:"新题",qs:["Do you use headphones?","How often do you wear headphones?","Do you think headphones are useful?","Are headphones popular in your country?","In what situations should people not wear headphones?"]},
+    {topic:"Singing",cat:"新题",qs:["Did you like singing when you were a child?","Do you like singing now?","Do you enjoy singing in the car?","Do you like listening to other people sing?","Did you learn to sing when you were at school?"]},
+    {topic:"Clothing",cat:"新题",qs:["What kind of clothes do you like to wear?","Do you prefer to wear comfortable and casual clothes or formal clothes?","Do you like wearing T-shirts?","Do you spend a lot of time choosing clothes?","Do you wear clothes of different styles on weekdays and weekends?","What colour clothing do you like?"]},
+    {topic:"Pets and Animals",cat:"保留旧题",qs:["What's your favourite animal? Why?","Have you ever had a pet before?","Where do you prefer to keep your pet, indoors or outdoors?","What is the most popular animal in China?"]},
+    {topic:"Food",cat:"保留旧题",qs:["What is your favourite food?","What kind of food did you like when you were young?","Do you eat different foods at different times of the year?","Has your favourite food changed since you were a child?"]},
+    {topic:"Walking",cat:"保留旧题",qs:["Do you walk a lot?","Did you often go outside to have a walk when you were a child?","Why do people like to walk in parks?","Where would you like to take a long walk if you had the chance?","Where did you go for a walk lately?"]},
+    {topic:"Morning Time",cat:"保留旧题",qs:["Do you like getting up early in the morning?","What do you usually do in the morning?","What did you do in the morning when you were little?","Are there any differences between what you do in the morning now and what you did in the past?","Do you spend your mornings doing the same things on both weekends and weekdays?"]},
+    {topic:"Gifts",cat:"保留旧题",qs:["Have you ever sent handmade gifts to others?","Have you ever received a great gift?","What do you consider when choosing a gift?","Do you think you are good at choosing gifts?","What gift have you received recently?"]},
+    {topic:"Reading",cat:"保留旧题",qs:["Do you like reading?","Do you prefer to read on paper or on a screen?","When do you need to read carefully, and when not?","Do you prefer scanning or detailed reading?"]},
+    {topic:"Sports Team",cat:"保留旧题",qs:["Have you ever been part of a sports team?","Are team sports popular in your culture?","Do you like to watch team games? Why?","What are the differences between team sports and individual sports?"]},
+    {topic:"Hobby",cat:"保留旧题",qs:["Do you have any hobbies?","Did you have any hobbies when you were a child?","Do you have a hobby that you've had since childhood?","Do you have the same hobbies as your family members?"]},
+    {topic:"Typing",cat:"保留旧题",qs:["Do you prefer typing or handwriting?","Do you type on a desktop or laptop keyboard every day?","When did you learn how to type on a keyboard?","How do you improve your typing?"]},
+    {topic:"Building",cat:"保留旧题",qs:["Are there tall buildings near your home?","Do you take photos of buildings?","Is there a building that you would like to visit?","Do you want to live in a tall building?"]},
+    {topic:"Childhood Activities",cat:"保留旧题",qs:["Did you prefer to do activities alone or with a group of people when you were a child?","Are there any differences between the activities you liked when you were a child and those you like now?","What are your favourite activities?","What were your favourite activities when you were a child?"]},
+    {topic:"Scenery",cat:"保留旧题",qs:["Do you look out the window at the scenery when travelling by bus or car?","Do you prefer the mountains or the sea?","Do you like to take pictures of the scenery?","What are the most beautiful sights you have seen while traveling?"]},
+    {topic:"View",cat:"保留旧题",qs:["Do you like taking pictures of different views?","Do you prefer views in urban areas or rural areas?","Do you prefer views in your own country or in other countries?","Have you ever seen an unforgettable and beautiful view or scenery?"]},
+    {topic:"Life Stages",cat:"保留旧题",qs:["What did you often do with your friends in your childhood?","What do you think is the most important at the moment?","Do you have any plans for the next five years?","How do people remember each stage of their lives?","Do you enjoy being the age you are now?","At what age do you think people are the happiest?"]},
+    {topic:"Daily Routine",cat:"保留旧题",qs:["What is your daily study routine?","Have you ever changed your routine?","Do you think it is important to have a daily routine for your study?","What part of your day do you like best?","Do you often go to bed late or early?"]}
+  ],
+  P2: [
+    {topic:"A Tall Building You Like or Dislike",cat:"新题",cues:["What it is used for","Where it is","What it looks like","And explain why you like or dislike it"],p3:["Are there many tall buildings in your country?","What are the differences between those tall buildings in your country?","Why are different places laid out and designed differently?","What are the advantages of living in tall buildings?","Why do some people like to remodel and decorate their homes themselves?","What kind of interior design style do most people like?"]},
+    {topic:"An Interesting Video",cat:"新题",cues:["When and where you watched it","What it is about","Why you watched it","And explain how you feel about it"],p3:["What kind of videos do people in your country like to watch?","Which is more helpful, watching videos or reading books?","What skills can people learn from watching videos?","Are there any differences between the videos that young people and old people like to watch?"]},
+    {topic:"A Time When You Got Up Early",cat:"新题",cues:["When it was","What you did","Why you got up early","And how you felt about it"],p3:["Do you know anyone who likes to get up early?","Why do people get up early?","What kinds of occasions need people to arrive early?","Why do some people like to stay up late?","Is it good to arrive early in any situation?","What kind of people like getting up early?"]},
+    {topic:"A Boring Place",cat:"新题",cues:["Where it is","Who you went there with","What you did there","And explain why you think it is a boring place"],p3:["Why do most children think education is boring?","Why aren't young people willing to listen to the experiences of older people?","What can people do when they feel bored?","Why are some teachers' classes boring? Are there any solutions?","Why do some young people feel bored when talking with old people?","Do most people think news about celebrities is boring?"]},
+    {topic:"A Friend from Your Childhood",cat:"新题",cues:["Who he/she is","Where and how you met each other","What you often did together","And explain what made you like him/her"],p3:["Do you still keep in touch with your friends from childhood?","How important is a childhood friendship to children?","What do you think of communicating with others through social media?","Do you think online communication will replace face-to-face communication?","What's the difference between talking to friends and family?","Has technology changed people's friendships? How?"]},
+    {topic:"Your Favorite City That You Have Visited",cat:"新题",cues:["Where it is","How you knew it","When you visited it","And explain why it is your favourite city"],p3:["Which is more suitable for young people, urban life or rural life?","How do people choose a city to travel to?","Do you think a tourist city is also a good place to live?","Do most people prefer to travel in a modern city or a historical city?"]},
+    {topic:"A Person Who Loves to Grow Plants",cat:"新题",cues:["Who this person is","What plants he/she grows","How he/she grows the plants","And explain why he/she loves growing plants"],p3:["What are the advantages of growing vegetables or flowers at home?","Do many people grow vegetables or flowers at home in your country?","Is it easy to grow plants at home?","Why do some people like to grow plants?","Why do some people prefer to grow their own fruits and vegetables?","Do you think students should learn to grow plants?"]},
+    {topic:"A New Law You Would Like to Introduce",cat:"新题",cues:["What law it is","What changes this law brings","Whether this new law will be popular","How you came up with the new law","And explain how you feel about this new law"],p3:["What rules should students follow at school?","Do people in your country usually obey the law?","What kinds of behavior are considered as good behavior?","Do you think children can learn about the law outside of school?","What are the benefits for people to obey rules?","How can parents teach children to obey rules?"]},
+    {topic:"A Person in the Medical Field",cat:"新题",cues:["When you knew him/her","When he/she started to think about that","What he/she would like to do","And explain why he/she would like to choose this career"],p3:["Do you think being a doctor is easy or difficult?","Do you think learning biology is interesting for children?","What personal qualities are needed to be a good doctor?","Do you think doctors in your country are paid enough?","Should medical students be required to work in rural areas after graduation?","Do you agree that artificial intelligence will replace some doctors in the future?"]},
+    {topic:"A Person with a Successful Business",cat:"新题",cues:["Who this person is","How you got to know him/her","Why and how he/she started the business","What business he/she does","And explain why you think the business is successful"],p3:["Why do some people start their own business?","Should governments provide financial support to start-ups?","Do most people prefer shopping at big stores or small stores?","What makes a business successful?","What makes a business fail?","Is it easy to set up a new business in your country?"]},
+    {topic:"A Plan That You Had to Change Recently",cat:"新题",cues:["When this happened","What made you change the plan","What the new plan was","And how you felt about the change"],p3:["Do people often change their plans?","Would you tell others if you change your plan?","Why do you think parents still make plans for their children nowadays?","How does technology help people make plans?","What kind of plans do people often make?","Do you think people like the process of making plans more, or the moment of carrying them out?"]},
+    {topic:"A Time When You Worked in a Group",cat:"新题",cues:["What you did","Who you worked with","What problems you faced","And explain why you worked in the group"],p3:["Why do some people prefer to work by themselves?","What should a leader do to make team members want to follow him or her?","Should students learn to do group work?","What group tasks are there in schools?","What advantages are there for students experiencing teamwork at school?","How can you tell if a person is a good leader?"]},
+    {topic:"An Ambition You Have Had for a Long Time",cat:"新题",cues:["What it was","How you got the desire to want to achieve it","What you have to do to achieve it","And explain how you feel about it"],p3:["What kinds of ambitions do people have?","Why should parents encourage children to have ambitions?","Should parents interfere with their children's ambitions?","Is there any difference between children's ambitions and those of grown-ups?","What goals do young people usually have?","Why are young people ambitious for higher positions?","What should people do to achieve their goals?"]},
+    {topic:"A Kind of Food for Special Occasions",cat:"新题",cues:["What it is","What occasion it was","Why you would like to eat it","And explain how you feel about it"],p3:["Why do people eat special food on special occasions or festivals?","What are the differences between everyday food and festival food?","Are there any differences between the food people eat today and the food people ate in the past?","Do people today prefer eating at home or in a restaurant?"]},
+    {topic:"A Live Sports Event You Watched",cat:"新题",cues:["What it was","When and where you watched it","Who you watched it with","And explain why you liked it"],p3:["Why do some people like to watch sports events?","Where do people normally watch sports events?","What are the advantages of watching sports events online?","What are the main differences between watching live in a stadium and on TV?","What kinds of sports events are most popular to watch in your country?","What types of sports matches are suitable for children to watch?","Why do some people spend a lot going to other countries to watch sports events?"]},
+    {topic:"An Advertisement with a Famous Person",cat:"新题",cues:["Who the person is","Where you can see it","What the advertisement is about","And explain how you feel about the advertisement"],p3:["What are the advantages and disadvantages of advertisements?","Why are many advertisements endorsed by celebrities? How useful are they?","What is the most important factor in an advertisement?","Why are some advertisements boring?","Is advertising important for a company? Why?","Which is more effective, online advertising or offline advertising?"]},
+    {topic:"A Piece of Local News",cat:"新题",cues:["What it was about","Where you saw or heard it","Who was involved","And explain why people were interested in it"],p3:["Are there a lot of people talking about local news?","Do young people or the elderly care more about local news?","Do people in your country prefer following local news or national news?","How has the way people get local news changed compared to the past?","Do you think local news is more trustworthy than national news?","Why do some people feel that local news is boring?","Should local news focus more on positive stories rather than crime and disasters?"]},
+    {topic:"A Problem with an Electronic Device",cat:"新题",cues:["When it happened","Where it happened","What the problem was","And explain how you solved the problem at last"],p3:["Why are people keen on buying new electronic devices?","What impact do electronic devices have on people?","Do old people and young people face the same kinds of problems with electronic devices?","Should companies be responsible for teaching customers how to use their products?","Do you think people rely too much on electronic devices?","Is it better to repair a broken electronic device or buy a new one?"]},
+    {topic:"An Important Decision That You Made",cat:"新题",cues:["What the decision was","How you made your decision","What the results of your decision were","And explain why it was important"],p3:["Do you think children sometimes have to make important decisions?","What important decisions do teenagers need to make after graduation?","Who can children turn to for help when making a decision?","Do you think advertisements can influence our decisions when shopping?","Do you think the influence of advertising is good?","How do people usually make important decisions?"]},
+    {topic:"A Person Good at Learning Languages",cat:"新题",cues:["How you got to know him/her","How he/she learns a new language","What languages he/she can speak","And explain how you feel about him/her"],p3:["Are there many people who can speak foreign languages in your country?","Does speaking other languages help at work?","Do people learn any languages other than English?","Why is it easier for children to learn new things than for adults?","How do people learn new things?","What is the most important thing for learning a language well?"]},
+    {topic:"No Reply for a Long Time",cat:"新题",cues:["Who you sent it to","What the message or email was about","Whether you finally received the reply","And explain how you felt about the experience"],p3:["In what situations do people spend a long time responding to messages?","In what situations do people not respond to messages right away?","What would you do if you haven't received a reply after sending out a message?","Why do some people prefer sending a message instead of making a call?","Are you more polite when sending a message to a stranger than to a friend?","Why do some people feel angry when others don't reply to their message?"]},
+    {topic:"A Challenging Technological Problem",cat:"新题",cues:["What the problem was","When and where you faced it","How challenging it was","And explain how you solved it"],p3:["What are the advantages and disadvantages of AI?","Do you think people today should learn about AI technology?","Should children learn to use AI?","How can AI help in our lives?","Do you think students are overly reliant on AI?","What can teachers do to stop students relying too much on AI?"]},
+    {topic:"A Place to Recommend to Others",cat:"新题",cues:["What it is","Where it is","What you saw and did there","And explain why you would like to recommend it to others"],p3:["Where do people in your country often go for holidays?","Where do young people in your country often go for holidays?","What is the ideal length for a holiday?","How do people usually plan holidays?","Is it important to plan a holiday ahead?"]},
+    {topic:"A TV Show or Online Program",cat:"新题",cues:["What it is","What it is about","How often you watch it","And explain how you feel about it"],p3:["What are the differences between TV programs young people and old people like to watch?","What makes a popular TV or online program?","What kinds of TV or online programs are popular in your country?","Do you think people spend too much time watching online programs nowadays?","Are educational programs less popular than entertainment programs?","Do you think traditional TV will eventually disappear?","Should parents limit children's time watching online programs?"]},
+    {topic:"A Home You Like to Visit But Not Live In",cat:"新题",cues:["Where it is","What it is like","Why you like to visit it","And explain why you would not like to live there"],p3:["Do Chinese people like to visit others' homes?","What do Chinese people do when they visit others?","What kind of place do people in your country like to live in?","What's the difference between homes in cities and those in the countryside?"]},
+    {topic:"A Story or Book with Animals",cat:"新题",cues:["What animals are in it","What the story or book is about","Why you read the story or book","And explain what you think of this story or book"],p3:["Should schools teach children about animals?","Some people think pets should not be kept in cities. What do you think?","Many people regard pets as members of their family. What do you think?","Do many people keep pets in your country?","What are the advantages of keeping a pet?","Why do people always tell children stories with animals?"]},
+    {topic:"Someone Helped You Solve a Problem",cat:"新题",cues:["Who the person is","What the problem was","How he/she helped you","And explain how you felt about the experience"],p3:["How important is it for schools to help children become smarter?","Should children be taught to solve problems on their own, or should they always ask for help?","Do people today rely too much on technology to solve their problems?","Why do some people find it difficult to ask for help?","Do you think friends or family members are more helpful when solving personal problems?"]},
+    {topic:"A Law on Environmental Protection",cat:"新题",cues:["What it is","How you first learned about it","Who benefits from it","And explain how you feel about this law"],p3:["What kinds of rules do schools in China have?","Do you think school rules are important?","Are children unhappy with the school rules?","How can parents and teachers help children understand and follow rules?","What are the rules people should obey at work?","What is the purpose of punishment?"]},
+    {topic:"A Time You Changed an Important Opinion",cat:"新题",cues:["When you changed your opinion","What the original opinion was","Why you changed it","And explain how you felt about the experience"],p3:["When do most children begin to have their own opinions?","Whose opinions are more important to children, their parents' or teachers'?","Do children communicate more with teachers or with parents?","Is it difficult for adults to change their opinions? Why?","What factors can cause a person to change a strongly held opinion?","Do you think social media makes it easier or harder for people to change their opinions?","Should people be judged for changing their opinions frequently?"]},
+    {topic:"A Person Who Overcame Difficulties and Succeeded",cat:"新题",cues:["Who this person is","What difficulties he met","How he overcame the difficulties","And explain how you feel about him"],p3:["In your country, what industry is it easier to be successful in?","Is hard work the most important factor for success?","Do you think failure is necessary for success?","Why do some people give up easily when facing difficulties?","Do young people and old people face different kinds of difficulties when trying to succeed?"]},
+    {topic:"A Perfect Job",cat:"保留旧题",cues:["What it is","How you knew it","What you need to learn to get this job","And explain why you think it is a perfect job for you"],p3:["What kind of job can be called a 'dream job'?","What jobs do children want to do when they grow up?","Do people's ideal jobs change as they grow up?","What should people consider when choosing jobs?","Is salary the main reason people choose a certain job?","What kind of jobs are the most popular in your country?"]},
+    {topic:"A Famous Person You Would Like to Meet",cat:"保留旧题",cues:["Who he/she is","How you knew him/her","How/where you would like to meet him/her","And explain why you would like to meet him/her"],p3:["What are the advantages and disadvantages of being a famous child?","What can today's children do to become famous?","What can children do with their fame?","Do people become famous because of their talent?","Is it easy to become famous in your country?","Do you want to be a famous person?"]},
+    {topic:"Not Allowed to Use Mobile Phone",cat:"保留旧题",cues:["When it was","Where it was","Why you were not allowed to use your mobile phone","And how you felt about it"],p3:["How do young and old people use mobile phones differently?","What positive and negative impact do mobile phones have on friendship?","Is it a waste of time to take pictures with mobile phones?","Do you think it is necessary to have laws on the use of mobile phones?","What are examples of good and poor phone manners?","How does the internet benefit people?"]},
+    {topic:"An Occasion When Many People Were Smiling",cat:"保留旧题",cues:["When it happened","Who you were with","What happened","And explain why most people were smiling"],p3:["Do you think people who like to smile are more friendly?","Why do most people smile in photographs?","Do women smile more than men? Why?","Do people smile more when they are younger or older?","Is smiling important in your culture?","Are there any occasions when people need to pretend to smile?"]},
+    {topic:"Proud of a Family Member",cat:"保留旧题",cues:["When it happened","Who the person is","What the person did","And explain why you felt proud of him/her"],p3:["When would parents feel proud of their children?","Should parents reward children? Why and how?","Is it good to reward children too often? Why?","On what occasions would adults be proud of themselves?","Do rewards help a child become better?","What do you think about children working hard just for grades?"]},
+    {topic:"Giving Advice to Others",cat:"保留旧题",cues:["When it was","To whom you gave the advice","What the advice was","And explain why you gave the advice"],p3:["Should people prepare before giving advice?","Is it good to ask advice from strangers online?","What are the personalities of people whose job is to give advice to others?","What are the problems if you ask too many people for advice?","Why do some people think it is better to ask for advice from friends than from parents?","When would old people ask young people for advice?"]},
+    {topic:"A Child Who Loves Drawing",cat:"保留旧题",cues:["Who he/she is","How/when you knew him/her","How often he/she draws/paints","And explain why you think he/she loves drawing/painting"],p3:["What is the right age for a child to learn drawing?","Why do most children draw more often than adults do?","Why do some people visit galleries or museums instead of viewing artworks online?","Do you think galleries and museums should be free of charge?","How do artworks inspire people?","What are the differences between reading a book and visiting a museum?"]},
+    {topic:"A Person Good at Planning",cat:"保留旧题",cues:["Who he/she is","How you knew him/her","What plans he/she makes","And explain how you feel about this person"],p3:["Do you think it's important to plan ahead?","What activities do we need to plan ahead?","Do you think children should plan their future careers?","Should children ask their teachers or parents for advice when making plans?","Is making study plans popular among young people?","Do you think choosing a college major is closely related to a future career?"]},
+    {topic:"A Program or App on Your Computer or Phone",cat:"保留旧题",cues:["What it is","When/how you use it","Where you found it","And explain how you feel about it"],p3:["What are the differences between old and young people when using apps?","Why do some people not like using apps?","What apps are popular in your country? Why?","Should parents limit their children's use of computer programs and games?","Do you think young people rely more and more on these programs?","What do you think about some countries banning children from using social media?"]},
+    {topic:"A Piece of Technology You Would Like to Own",cat:"保留旧题",cues:["What it is","How much it costs","How you knew it","And explain why you would like to own it"],p3:["What are the differences between the technology of the past and that of today?","What technology do young people like to use?","What are the differences between online and face-to-face communication?","Do you think technology has changed the way people communicate?","What negative effects does technology have on people's relationships?","What are the differences between making friends in real life and online?"]},
+    {topic:"A Bicycle/Motorcycle/Car Trip",cat:"保留旧题",cues:["Who you would like to go with","Where you would like to go","When you would like to go","And explain why you would like to go by bicycle/motorcycle/car"],p3:["Which form of vehicle is more popular in your country?","Do you think air pollution comes mostly from motor vehicles?","Do you think people need to change transportation drastically to protect the environment?","How are the transportation systems in urban and rural areas different?","Why do more people own and drive private vehicles now?","What do you think of the future of electric cars?"]},
+    {topic:"Something Important Kept in Your Family",cat:"保留旧题",cues:["What it is","When your family had it","How your family got it","And explain why it is important to your family"],p3:["What things do families keep for a long time?","What's the difference between things valued in the past and today?","What kinds of things are kept in museums?","What's the influence of technology on museums?","What are the benefits of technology for learning history?","Why do people visit museums?"]},
+    {topic:"A Person Who Solved a Problem Smartly",cat:"保留旧题",cues:["Who this person is","What the problem was","How he/she solved it","And explain why you think he/she did it in a smart way"],p3:["Do you think children are born smart or do they learn to become smart?","How do children become smart at school?","Why are some people well-rounded and others only good at one thing?","Why does modern society need talents of all kinds?","Do you think smart children are happier than other children?","Is it important for schools to identify and develop each student's talents?"]},
+    {topic:"An Event Where You Didn't Enjoy the Music",cat:"保留旧题",cues:["What it was","Who you went with","Why you decided to go there","And explain why you didn't enjoy it"],p3:["What kind of music events do people like today?","Do you think children should receive some musical education?","What are the differences between old and young people's music preferences?","What kind of music events are there in your country?","Why do many people like listening to music while doing sports?","What are the differences between listening to music at home and at a live concert?"]},
+    {topic:"A Movie You Watched and Enjoyed Recently",cat:"保留旧题",cues:["When and where you watched it","Who you watched it with","What it was about","And explain why you watched this movie"],p3:["What kinds of movies do you think are successful in your country?","What are the factors that make a successful movie?","Do Chinese people prefer to watch domestic or foreign movies?","Do you think only well-known directors can create the best movies?","Do you think successful movies should have well-known actors?","Why do people prefer to watch movies in the cinema?"]},
+    {topic:"A Friend Who Learned Something Without a Teacher",cat:"保留旧题",cues:["Who he/she is","What he/she learned","Why he/she learned this","And explain whether it would be easier to learn from a teacher"],p3:["Is it necessary to keep learning after graduating from school?","Should teachers make learning in their classes fun?","Do you think there are too many subjects for students to learn?","Is it better to focus on a few subjects or to learn many subjects?","Do you think enterprises should provide training for their employees?","Do you think it is good for older adults to continue learning?"]},
+    {topic:"An Interesting Building",cat:"保留旧题",cues:["Where it is","What it looks like","What function it has","And explain why you think it is interesting"],p3:["What types of buildings are popular in your country?","Is it worth spending a lot of money on the exterior appearance of a building?","Is it more important for a building to look good on the outside or on the inside?","Why do people like to visit historical sites?","Do you think it's reasonable to charge an entry fee for visiting interesting buildings?","Is it better to live in a new building or an old one?"]},
+    {topic:"A Time You Needed to Use Your Imagination",cat:"保留旧题",cues:["When it was","Why you needed to use imagination","How difficult or easy it was","And explain how you felt about it"],p3:["Do you think adults can have lots of imagination?","Do you think imagination is essential for scientists?","What kinds of jobs need imagination?","What subjects are helpful for children's imagination?","What games help develop children's imagination?","How important is imagination to children?"]},
+    {topic:"An Item You Spent More Than Expected",cat:"保留旧题",cues:["What it is","How much you spent on it","Why you bought it","And explain why you think you spent more than expected"],p3:["Do you often buy more than you expected?","What do you think young people spend most of their money on?","Do you think it is important to save money? Why?","Do people buy things they don't need?","Do you think it is the rich people's responsibility to donate money?","What kind of things are people happy to pay a high price for?"]},
+    {topic:"A Person Who Often Helps Others",cat:"保留旧题",cues:["Who this person is","How often he/she helps others","How/why he/she helps others","And how you feel about this person"],p3:["What can children do to help their parents?","Should children help their parents with household chores?","What kind of help do people need when looking for a new job?","Who should people ask for help, colleagues or family members?","Do you think schools should teach children to do household chores?","Why are employees reluctant to ask their managers for help?"]},
+    {topic:"Encouraging Someone to Do Something",cat:"保留旧题",cues:["Who he or she is","What you encouraged him/her to do","How he/she reacted","And explain why you encouraged him/her to do it"],p3:["How can leaders encourage their employees?","When should parents encourage their children?","What kind of encouragement should parents give?","Do you think some people are better than others at persuading?","Should children do everything their parents ask them to do?","How can employers encourage their staff?"]},
+    {topic:"A Short-Term Job in a Foreign Country",cat:"保留旧题",cues:["Where it is","How you know of it","What the job is","And explain why you want to do it"],p3:["What short-term jobs do young people do in other countries?","What challenges do young people face when working abroad?","What are the benefits of working for an international company?","What personal skills are required to work in an international company?","What kind of work can young people do in foreign countries?","Why are some people unwilling to work in other countries?"]},
+    {topic:"A Person Who Likes to Look After Nature",cat:"保留旧题",cues:["Who this person is","What he or she does","How he or she does it","How often he or she does it","And explain how you feel about this person"],p3:["Do you think parents should teach their children how to protect the environment?","What laws about the environment are effective in your country?","Which do people prefer, rewards or punishment, for environmental protection?","Is it easy for children in cities to get close to the natural world?","What can people do to protect the natural world?","Is it important to teach students environmental protection at school?"]},
+    {topic:"A City You Enjoyed Visiting",cat:"保留旧题",cues:["Where it is","When you visited it","How long you stayed there","What you did there","And explain why you enjoyed visiting it"],p3:["What kinds of facilities do big cities have?","Do you think modern cities are suitable for young people or old people?","Before you travel to a city, what factors would you consider?","What are the disadvantages of living in a very famous city?","Do you prefer to visit well-developed cities or cities with a long history?","For those who live in cities, is it because they want to or have to?"]},
+    {topic:"A Place Where You Enjoy Shopping",cat:"保留旧题",cues:["Where it is","How often you visit it","What you usually buy at the mall","And explain why it is a good place for shopping"],p3:["Why do people buy things they don't need?","Do you think it's a waste of time to go shopping?","Why are some people keen on shopping?","What kind of people like shopping?","Where do people like to shop in your country?","Do you think women like shopping more than men?"]}
+  ]
+};
+
+/* ============ 状态 ============ */
+var part=1, mode='seq', p1i=0,p1q=0,p2i=0,p3i=0,p3q=0;
+var rec=false, mediaRecorder=null, chunks=[], recStream=null;
+var speaking=false, synth=window.speechSynthesis, voice=null;
+var recognizing=false, recognition=null;
+var prepTimer=null, speakTimer=null;
+var settings={key:'', stt:'web', rate:0.85, voice:'', autoRead:true};
+
+function $(id){return document.getElementById(id)}
+function toast(m){var t=$('toast');t.textContent=m;t.classList.add('show');clearTimeout(t._tm);t._tm=setTimeout(function(){t.classList.remove('show')},2200)}
+function esc(s){return String(s).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+
+/* ============ 题库：导入 / 导出 / 重置 ============ */
+function loadBank(){var raw=localStorage.getItem('ielts:bank');if(raw){try{var b=JSON.parse(raw);if(b&&b.P1&&b.P2)return b}catch(e){}}return null}
+function saveBank(b){localStorage.setItem('ielts:bank',JSON.stringify(b))}
+function resetBank(){localStorage.removeItem('ielts:bank');applyBank();toast('已恢复内置题库')}
+function applyBank(){var b=loadBank()||JSON.parse(JSON.stringify(BANK));window.bank=b;$('bankLabel').textContent='题库：'+b.season+' · 离线可用';$('p1count').textContent=b.P1.length+' topics';$('p2count').textContent=b.P2.length+' topics';$('p3count').textContent=b.P2.length+' topics';p1i=p1q=p2i=p3i=p3q=0;buildTopicList();updUI()}
+
+/* ============ 当前题目 ============ */
+function curQ(){
+  if(part===1){var t=bank.P1[p1i%bank.P1.length];return{ty:'p1',topic:t,q:t.qs[p1q%t.qs.length],ti:p1i,qi:p1q,tt:bank.P1.length}}
+  if(part===2){var t=bank.P2[p2i%bank.P2.length];return{ty:'p2',topic:t,ti:p2i,tt:bank.P2.length}}
+  var t=bank.P2[p3i%bank.P2.length];return{ty:'p3',topic:t,q:t.p3[p3q%t.p3.length],ti:p3i,qi:p3q,tt:bank.P2.length}
+}
+function updUI(){
+  var info=curQ();
+  $('catTag').textContent=info.topic.cat||'';
+  if(info.ty==='p1'){$('tlText').textContent='PART 1 · '+info.topic.topic;$('qn').textContent='Topic '+(info.ti+1)+'/'+info.tt+' · Q '+(info.qi+1)+'/'+info.topic.qs.length;$('qt').textContent=info.q;$('cue').style.display='none'}
+  else if(info.ty==='p2'){$('tlText').textContent='PART 2 · '+info.topic.topic;$('qn').textContent='Topic '+(info.ti+1)+'/'+info.tt+' · Speak for 2 minutes';$('qt').textContent='Describe: '+info.topic.topic;var h='';info.topic.cues.forEach(function(c){h+='<li>'+esc(c)+'</li>'});$('cuelist').innerHTML=h;$('cue').style.display=''}
+  else{$('tlText').textContent='PART 3 · '+info.topic.topic;$('qn').textContent='Topic '+(info.ti+1)+'/'+info.tt+' · Q '+(info.qi+1)+'/'+info.topic.p3.length;$('qt').textContent=info.q;$('cue').style.display='none'}
+}
+
+/* ============ 话题列表 ============ */
+function buildTopicList(){
+  var data=(part===1)?bank.P1:bank.P2;
+  var ci=(part===1)?p1i:(part===2?p2i:p3i);
+  var cats={};data.forEach(function(t,i){if(!cats[t.cat])cats[t.cat]=[];cats[t.cat].push({topic:t,i:i})});
+  var html='';
+  Object.keys(cats).forEach(function(cat){
+    html+='<div class="catgrp"><div class="cathdr"><span class="arr">▼</span> '+esc(cat)+' ('+cats[cat].length+')</div>';
+    cats[cat].forEach(function(it){
+      var cur=(it.i===ci)?' cur':'';
+      var badge=part===1?(it.topic.qs.length+' 题'):(it.topic.cues.length+' cues');
+      html+='<div class="topicrow'+cur+'" data-i="'+it.i+'"><span>'+esc(it.topic.topic)+'</span><span class="badge">'+badge+'</span></div>';
+    });
+    html+='</div>';
+  });
+  $('topicList').innerHTML=html;
+  Array.prototype.forEach.call($('topicList').querySelectorAll('.catgrp'),function(g){g.querySelector('.cathdr').onclick=function(){g.classList.toggle('folded')}});
+  Array.prototype.forEach.call($('topicList').querySelectorAll('.topicrow'),function(r){r.onclick=function(){jumpTopic(parseInt(r.getAttribute('data-i'),10))}});
+}
+function jumpTopic(i){
+  stopSpeak();clearTimers();
+  if(part===1){p1i=i;p1q=0}else if(part===2){p2i=i}else{p3i=i;p3q=0}
+  updUI();buildTopicList();hidePanels();autoAsk();
+}
+function hidePanels(){$('topicPanel').classList.remove('show')}
+
+/* ============ 读题（TTS）============ */
+function loadVoice(){
+  var v=synth.getVoices();
+  // 用户手动选的优先
+  if(settings.voice){for(var j=0;j<v.length;j++)if(v[j].name===settings.voice){voice=v[j];return}}
+  // 自动选：优先在线自然语音（Google / Microsoft 网络语音），最接近真人
+  var pref=['Google UK English Female','Google US English','Google UK English Male','Microsoft Aria','Microsoft Jenny','Microsoft Guy','Microsoft Sonia','Google 普通话（中国大陆）','Samantha','Daniel','Karen','Alex'];
+  for(var i=0;i<pref.length;i++)for(var k=0;k<v.length;k++)if(v[k].name.indexOf(pref[i])!==-1){voice=v[k];return}
+  // 退而求其次：任何 en- 开头的
+  for(var m=0;m<v.length;m++)if(/^en/i.test(v[m].lang)){voice=v[m];return}
+  if(v.length)voice=v[0];
+}
+loadVoice();if(synth.onvoiceschanged!==undefined)synth.onvoiceschanged=loadVoice;
+function askQ(){
+  if(speaking){stopSpeak();return}
+  var info=curQ();var txt='';
+  if(info.ty==='p1')txt=info.q;
+  else if(info.ty==='p2')txt="I'd like you to describe "+info.topic.topic+". You should say: "+info.topic.cues.join('. ')+". You have one minute to prepare, and you should speak for one to two minutes.";
+  else txt=info.q;
+  if(!synth){toast('浏览器不支持语音合成');return}
+  var u=new SpeechSynthesisUtterance(txt);u.lang='en-US';u.rate=parseFloat(settings.rate||0.85);u.pitch=1;if(voice)u.voice=voice;
+  u.onend=function(){speaking=false;$('btnAsk').innerHTML='<span class="ic">🔊</span>读题';$('btnAsk').classList.remove('btn-stop');if(info.ty==='p2')prepCountdown()};
+  u.onerror=function(){speaking=false;$('btnAsk').innerHTML='<span class="ic">🔊</span>读题';$('btnAsk').classList.remove('btn-stop')};
+  synth.speak(u);speaking=true;$('btnAsk').innerHTML='<span class="ic">⏹</span>停止';$('btnAsk').classList.add('btn-stop');
+}
+function stopSpeak(){if(synth)synth.cancel();speaking=false;$('btnAsk').innerHTML='<span class="ic">🔊</span>读题';$('btnAsk').classList.remove('btn-stop')}
+function autoAsk(){if(settings.autoRead!==false){setTimeout(function(){askQ()},380)}}
+
+/* ============ 计时器 ============ */
+function clearTimers(){if(prepTimer){clearInterval(prepTimer);prepTimer=null}if(speakTimer){clearInterval(speakTimer);speakTimer=null}}
+function prepCountdown(){
+  clearTimers();var box=$('timerBox');box.classList.add('show');box.classList.remove('danger');$('timerLabel').textContent='准备时间（可以打草稿）';var d=$('timerNum');d.textContent='1:00';var s=60;
+  prepTimer=setInterval(function(){s--;var m=Math.floor(s/60),sec=s%60;d.textContent=m+':'+(sec<10?'0':'')+sec;if(s<=10)box.classList.add('danger');if(s<=0){clearInterval(prepTimer);speakCountdown()}},1000);
+}
+function speakCountdown(){
+  clearTimers();var box=$('timerBox');box.classList.add('show');box.classList.remove('danger');$('timerLabel').textContent='现在开始说！（2 分钟）';var d=$('timerNum');d.textContent='2:00';var s=120;
+  speakTimer=setInterval(function(){s--;var m=Math.floor(s/60),sec=s%60;d.textContent=m+':'+(sec<10?'0':'')+sec;if(s<=30&&s>10)box.classList.add('danger');if(s<=10)box.classList.add('danger');if(s<=0){clearInterval(speakTimer);box.classList.remove('show');toast('时间到！')}},1000);
+}
+
+/* ============ 录音 ============ */
+function getMime(){var t=['audio/webm','audio/mp4','audio/ogg;codecs=opus','audio/wav'];for(var i=0;i<t.length;i++)if(window.MediaRecorder&&MediaRecorder.isTypeSupported(t[i]))return t[i];return'audio/webm'}
+function toggleRec(){if(rec)stopRec();else startRec()}
+function startRec(){
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia){toast('浏览器不支持录音');return}
+  rec=true;recStream=null;mediaRecorder=null;chunks=[];
+  var b=$('btnRec');b.textContent='停止';b.classList.add('rec');
+  navigator.mediaDevices.getUserMedia({audio:true}).then(function(stream){
+    recStream=stream;var mime=getMime();
+    try{mediaRecorder=new MediaRecorder(stream,{mimeType:mime})}catch(e){mediaRecorder=new MediaRecorder(stream)}
+    mediaRecorder.ondataavailable=function(e){if(e.data.size>0)chunks.push(e.data)};
+    mediaRecorder.onstop=function(){if(!chunks.length){toast('没有录到声音');return}var blob=new Blob(chunks,{type:mediaRecorder.mimeType||'audio/webm'});var url=URL.createObjectURL(blob);addRec(url);if(recStream){recStream.getTracks().forEach(function(t){t.stop()});recStream=null}};
+    mediaRecorder.onerror=function(){toast('录音出错');stopRec()};
+    mediaRecorder.start(1000);b.textContent='停止';toast('录音中…')
+  }).catch(function(e){rec=false;b.textContent='🎙️ 录音';b.classList.remove('rec');if(e.name==='NotAllowedError')toast('麦克风被拒绝');else toast('出错：'+e.message)});
+}
+function stopRec(){if(!rec)return;rec=false;var b=$('btnRec');b.textContent='🎙️ 录音';b.classList.remove('rec');if(mediaRecorder&&mediaRecorder.state!=='inactive'){mediaRecorder.stop();toast('已保存')}else if(recStream){recStream.getTracks().forEach(function(t){t.stop()});recStream=null;toast('已取消')}else toast('没有在录音')}
+function addRec(url){
+  var info=curQ();var label=info.ty.toUpperCase()+' - '+(info.q||info.topic.topic);
+  var list=$('recsList');var dv=document.createElement('div');dv.className='ri';
+  dv.innerHTML='<div class="ri-top"><span style="font-weight:700">🎙️</span><span class="ri-label">'+esc(label)+'</span><button class="del">✕</button></div><audio controls src="'+url+'"></audio>';
+  dv.querySelector('.del').onclick=function(){dv.remove();if(!list.querySelector('.ri'))$('recsPanel').classList.remove('show')};
+  list.appendChild(dv);$('recsPanel').classList.add('show');
+}
+
+/* ============ 语音识别（听写）============ */
+var SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+var recognitionFlow={active:false, sendToAI:false, finalText:'', sessionText:''};
+function updateSTTHint(){
+  var hint=$('sttSupportHint');
+  if(SR){hint.textContent='✅ 当前浏览器支持语音识别（需联网，Chrome/Edge 效果最好）。iOS Safari / Firefox 可能不可用。'}else{hint.textContent='⚠️ 当前浏览器不支持语音识别。你可以仍用「录音」，再把录音转成文字贴给 AI（或手动输入）。'}
+}
+function startRecognition(andSendToAI){
+  if(!SR){toast('此浏览器不支持语音识别，手动把答案输入转写框即可');makeTranscriptEditable();return}
+  stopRecognition();
+  recognitionFlow.active=true;recognitionFlow.sendToAI=!!andSendToAI;recognitionFlow.finalText='';recognitionFlow.sessionText='';
+  var box=$('transcriptBox');box.textContent='🎧 正在听… 请开始说（停顿也没关系，我会继续听）。';
+  setAIBtn(true);
+  launchRecognition();
+}
+function launchRecognition(){
+  if(!recognitionFlow.active)return;
+  var r=new SR();recognition=r;
+  r.lang='en-US';r.interimResults=true;r.continuous=true;r.maxAlternatives=1;
+  var box=$('transcriptBox');
+  r.onresult=function(e){
+    var interim='';
+    for(var i=e.resultIndex;i<e.results.length;i++){var r2=e.results[i];if(r2.isFinal)recognitionFlow.sessionText+=r2[0].transcript+' ';else interim+=r2[0].transcript}
+    var shown=(recognitionFlow.sessionText+' '+interim).replace(/\s+/g,' ').trim();
+    if(shown){box.textContent=shown;recognitionFlow.finalText=recognitionFlow.sessionText.replace(/\s+/g,' ').trim()}
+  };
+  r.onerror=function(e){
+    if(e.error==='no-speech'||e.error==='aborted'){
+      // 静音或被打断：只要用户还没手动停，就重启继续等，承受更久沉默
+      if(recognitionFlow.active){setTimeout(function(){launchRecognition()},400);return}
+    }
+    recognitionFlow.active=false;setAIBtn(false);
+    if(e.error==='not-allowed')toast('麦克风被拒绝');
+    else if(e.error!=='no-speech')toast('识别出错：'+e.error);
+  };
+  r.onend=function(){
+    if(recognitionFlow.active){
+      // 静音导致自动结束，但用户没手动停 → 自动重启，继续听
+      setTimeout(function(){launchRecognition()},300);
+    }else{
+      setAIBtn(false);
+      if(recognitionFlow.finalText){recognitionFlow.sendToAI?processTranscript():toast('已转写，点「AI 反馈」评分')}
+      else{toast('没有识别到内容，可以再试一次或手动输入')}
+    }
+  };
+  try{r.start()}catch(e){recognitionFlow.active=false;setAIBtn(false);toast('无法启动语音识别：'+e.message)}
+}
+function stopRecognition(){recognitionFlow.active=false;if(recognition){try{recognition.stop()}catch(e){}recognition=null}}
+function setAIBtn(listening){
+  var b=$('btnAI');
+  if(listening){b.innerHTML='<span class="ic">⏹</span>停止听写';b.classList.add('btn-stop')}
+  else{b.innerHTML='<span class="ic">✨</span>AI 反馈';b.classList.remove('btn-stop')}
+}
+
+/* ============ AI 反馈（DeepSeek）=========== */
+function runAI(){
+  var key=(settings.key||'').trim();
+  if(recognitionFlow.active){stopRecognition();return}
+  var info=curQ();
+  var question=info.ty==='p2'?('Describe '+info.topic.topic+'. '+info.topic.cues.join('. ')):(info.q||info.topic.topic);
+  var box=$('transcriptBox');
+  var transcript=box.textContent||'';
+  var isPlaceholder=transcript.indexOf('还没有内容')!==-1||transcript.indexOf('正在听')!==-1||transcript.indexOf('🎧')!==-1;
+  if(isPlaceholder||!transcript.trim()){
+    if(SR&&settings.stt!=='off'){toast('请说话，说完会自动评分');startRecognition(true);return}
+    toast('这个浏览器不支持语音识别，请把答案输入转写框，再点「AI 反馈」');makeTranscriptEditable();return;
+  }
+  processTranscript();
+}
+function processTranscript(){
+  if((settings.key||'').trim()){sendToAI();}
+  else{runLocalFeedback();}
+}
+function sendToAI(){
+  var key=(settings.key||'').trim();
+  var info=curQ();
+  var question=info.ty==='p2'?('Describe '+info.topic.topic+'. '+info.topic.cues.join('. ')):(info.q||info.topic.topic);
+  var transcript=$('transcriptBox').textContent.trim();
+  $('aiPanel').classList.add('show');
+  $('aiResult').innerHTML='<div class="ai-section"><p style="color:var(--ink-3)">正在让 AI 打分，约 3–5 秒…</p></div>';
+  var partLabel=info.ty==='p1'?'Part 1':(info.ty==='p2'?'Part 2':'Part 3');
+  var sys='你是一位严格、专业的雅思口语考官。请分析考生的回答，只返回合法 JSON，格式必须为：{"band":number,"fluency":number,"lexical":number,"grammar":number,"overall":"一句话总评（用中文）","strengths":["亮点（用中文）"],"fixes":["改进建议（用中文）"],"improved":"一个改写后的英文示例"}。band 是 1-9 分、0.5 为步长。要求：overall、strengths、fixes 全部用中文；只有 improved 字段保持英文（因为那是给考生的英文答案改写示例）。诚实、具体，建议要能落地。考生答案是语音转写文本，请忽略轻微转写错误，评判口语本身。';
+  var usr=partLabel+' question: "'+question+'"\nCandidate answer (transcript): "'+transcript+'"';
+  fetch('https://api.deepseek.com/chat/completions',{method:'POST',headers:{'Content-Type':'application/json','Authorization':'Bearer '+key},body:JSON.stringify({model:'deepseek-chat',messages:[{role:'system',content:sys},{role:'user',content:usr}],temperature:0.3,max_tokens:900,response_format:{type:'json_object'}})})
+  .then(function(r){if(!r.ok)throw new Error('HTTP '+r.status);return r.json()})
+  .then(function(d){var c=d.choices[0].message.content;var obj;try{obj=JSON.parse(c)}catch(e){obj=null}
+    if(!obj){$('aiResult').innerHTML='<div class="ai-section"><p>AI 返回了非结构化内容：</p><p style="white-space:pre-wrap">'+esc(c)+'</p></div>';return}
+    renderAI(obj);
+  })
+  .catch(function(e){$('aiResult').innerHTML='<div class="ai-section"><p style="color:#D64545">请求失败：'+esc(e.message)+'</p><p style="color:var(--ink-3)">常见原因：Key 无效 / 网络不通 / DeepSeek 账户欠费。</p></div>'});
+}
+/* ============ 离线基础反馈（无 API Key 时的兜底）============ */
+function runLocalFeedback(){
+  var info=curQ();
+  var text=$('transcriptBox').textContent.trim();
+  var words=text.split(/\s+/).filter(function(w){return w.length});
+  var wc=words.length;
+  if(!wc){toast('没有可分析的内容');return}
+  var seenAll={};
+  words.forEach(function(w){var k=w.toLowerCase().replace(/[^a-z0-9']/g,'');if(k)seenAll[k]=1});
+  var uniqAll=Object.keys(seenAll).length;
+  var ttr=Math.round(uniqAll/wc*100);
+  // 实义词词频（去掉停用词），找重复最多的词
+  var stop={the:1,a:1,an:1,and:1,or:1,but:1,of:1,to:1,in:1,on:1,for:1,with:1,is:1,are:1,was:1,were:1,am:1,be:1,been:1,it:1,this:1,that:1,these:1,those:1,i:1,you:1,he:1,she:1,they:1,we:1,my:1,your:1,his:1,her:1,me:1,do:1,does:1,did:1,have:1,has:1,had:1,can:1,could:1,will:1,would:1,should:1,not:1,so:1,very:1,really:1,just:1,also:1,as:1,at:1,by:1,from:1,about:1,into:1,if:1,then:1,than:1,what:1,when:1,where:1,which:1,who:1,how:1,like:1,get:1,got:1,go:1,going:1,things:1,thing:1};
+  var freq={};
+  words.forEach(function(w){var k=w.toLowerCase().replace(/[^a-z0-9']/g,'');if(k&&!stop[k])freq[k]=(freq[k]||0)+1});
+  var repeated=Object.keys(freq).filter(function(k){return freq[k]>=2}).sort(function(a,b){return freq[b]-freq[a]}).slice(0,3);
+  var linkers=(text.match(/\b(however|although|though|because|therefore|moreover|furthermore|for example|for instance|in addition|first|second|finally|on the other hand|instead|while|whereas)\b/gi)||[]).length;
+  var sentences=text.split(/[.!?]+/).filter(function(s){return s.trim().length});
+  var avgSent=sentences.length?Math.round(wc/sentences.length):0;
+  var iStart=sentences.filter(function(s){return /^\s*(i|i'm|i\s)/i.test(s)}).length;
+  var iPct=sentences.length?Math.round(iStart/sentences.length*100):0;
+  var fillers=(text.match(/\b(um|uh|er|you know|i mean|actually|basically|kind of|sort of|well|you see)\b/gi)||[]).length;
+  var target;
+  if(info.ty==='p1')target=[20,50,'Part 1 一般答 2–4 句'];
+  else if(info.ty==='p2')target=[120,250,'Part 2 应说满约 1.5–2 分钟'];
+  else target=[40,90,'Part 3 一般答 3–5 句'];
+  var lenTxt,lenColor;
+  if(wc<target[0]){lenColor='#D64545';lenTxt='偏短：只有 '+wc+' 词。'+target[2]+'，建议展开理由、举例或说感受。'}
+  else if(wc>target[1]){lenColor='#C9A227';lenTxt='偏长：'+wc+' 词。内容多是好事，但注意别跑题或重复。'}
+  else{lenColor='var(--green)';lenTxt='长度合适：'+wc+' 词，落在 '+target[0]+'–'+target[1]+' 的合理区间。'}
+  var ttrEval=ttr>=55?'词汇多样性不错（'+ttr+'% 的词不重复）。':(ttr>=40?'词汇多样性中等（'+ttr+'%），可以再换一些同义表达。':'重复词较多（'+ttr+'%），建议积累同义替换。');
+  var linkEval=linkers>=2?'用了 '+linkers+' 个连接词，逻辑衔接不错。':(linkers>=1?'只用了 '+linkers+' 个连接词，可以再加 because / for example / however 让逻辑更顺。':'几乎没有连接词，加上 because / for example / however 会让答案更有逻辑。');
+  var sentEval=(avgSent>=8&&avgSent<=20)?'平均句长 '+avgSent+' 词，节奏适中。':('平均句长 '+avgSent+' 词，'+(avgSent>20?'句子偏长，口语里拆成短句更自然。':'句子偏短，可以适当展开。'));
+  var repeatEval;
+  if(repeated.length){repeatEval='出现最频繁的词：'+repeated.map(function(k){return '“'+esc(k)+'”（'+freq[k]+' 次）'}).join('、')+'。口语里适当重复没问题，但可以用同义替换避免单调。'}
+  else{repeatEval='没有明显重复的实义词，不错。'}
+  var iEval=(iPct>60)?('有 '+iPct+'% 的句子以 “I” 开头，容易显得单调。可以换用 It… / There is… / 先说结果再展开。'):('以 “I” 开头的句子占 '+iPct+'%，开头变化适中。');
+  var fillEval=fillers>0?('出现了 '+fillers+' 个填充词（um / you know / actually 这类），适当减少会让表达更利落。'):('没有明显的口语填充词，很好。');
+  var html='<div class="ai-meta"><span class="chip">离线基础版</span><span class="chip">'+wc+' 词</span><span class="chip">'+uniqAll+' 唯一词</span><span class="chip">'+sentences.length+' 句</span></div>';
+  html+='<div class="ai-section"><h4>篇幅</h4><p style="color:'+lenColor+'">'+lenTxt+'</p></div>';
+  html+='<div class="ai-section"><h4>词汇多样性</h4><p>'+ttrEval+'</p></div>';
+  html+='<div class="ai-section"><h4>重复词</h4><p>'+repeatEval+'</p></div>';
+  html+='<div class="ai-section"><h4>连接词</h4><p>'+linkEval+'</p></div>';
+  html+='<div class="ai-section"><h4>句长</h4><p>'+sentEval+'</p></div>';
+  html+='<div class="ai-section"><h4>句子开头</h4><p>'+iEval+'</p></div>';
+  html+='<div class="ai-section"><h4>填充词</h4><p>'+fillEval+'</p></div>';
+  html+='<div class="ai-section"><p style="color:var(--ink-3);font-size:12px">⚠️ 这是离线基础分析（只统计文字）。发音、流利度、语法准确度无法从文字判断，也不给 band 分。想要 AI 逐句点评和预估分，在 ⚙️ 设置里填一个 DeepSeek Key（免费注册即可，不填也完全能练）。</p></div>';
+  $('aiPanel').classList.add('show');
+  $('aiResult').innerHTML=html;
+  bumpStats();
+}
+
+function renderAI(o){
+  var chips='<div class="ai-meta"><span class="chip">流利度 '+o.fluency+'</span><span class="chip">词汇 '+o.lexical+'</span><span class="chip">语法 '+o.grammar+'</span></div>';
+  var str='<div class="bandrow"><span class="band-num">'+o.band+'</span><span class="band-max">/ 9</span><span class="band-note">预估分（基于文字，仅供参考）</span></div>'+chips;
+  str+='<div class="ai-section"><h4>总体评价</h4><p>'+esc(o.overall)+'</p></div>';
+  if(o.strengths&&o.strengths.length){str+='<div class="ai-section"><h4>亮点</h4><ul>'+o.strengths.map(function(x){return'<li>'+esc(x)+'</li>'}).join('')+'</ul></div>'}
+  if(o.fixes&&o.fixes.length){str+='<div class="ai-section"><h4>改进建议</h4><ul>'+o.fixes.map(function(x){return'<li>'+esc(x)+'</li>'}).join('')+'</ul></div>'}
+  if(o.improved){str+='<div class="ai-section"><h4>改写示例</h4><p style="font-style:italic">“'+esc(o.improved)+'”</p></div>'}
+  $('aiResult').innerHTML=str;
+  bumpStats();
+}
+function makeTranscriptEditable(){
+  var b=$('transcriptBox');b.setAttribute('contenteditable','true');b.focus();
+  b.style.border='1.5px solid var(--red)';
+  var tip=document.createElement('div');tip.className='stt-tip';tip.innerHTML='现在可以把你说的话打进来，然后再次点「AI 反馈」。';b.parentNode.insertBefore(tip,b.nextSibling);
+}
+
+/* ============ 练习统计（正反馈）=========== */
+function bumpStats(){
+  var today=new Date().toISOString().slice(0,10);
+  var stats=loadStats();
+  if(stats.lastDay!==today){if(isYesterday(stats.lastDay))stats.streak++;else stats.streak=1;stats.lastDay=today}
+  stats.total++;stats.today++;
+  stats.days[today]=(stats.days[today]||0)+1;
+  saveStats(stats);renderStats();
+}
+function loadStats(){var raw=localStorage.getItem('ielts:stats');if(raw){try{return JSON.parse(raw)}catch(e){}}return{lastDay:'',streak:0,total:0,today:0,days:{}}}
+function saveStats(s){localStorage.setItem('ielts:stats',JSON.stringify(s))}
+function isYesterday(d){if(!d)return false;var y=new Date(d);y.setDate(y.getDate()+1);return y.toISOString().slice(0,10)===new Date().toISOString().slice(0,10)}
+function renderStats(){
+  var s=loadStats();
+  $('statToday').textContent=s.today;$('statTotal').textContent=s.total;$('statStreak').textContent=s.streak;
+  $('streakBadge').textContent='🔥 连续 '+s.streak+' 天';
+  // 热力图：近 90 天
+  var html='';var d=new Date();d.setDate(d.getDate()-89);
+  for(var i=0;i<90;i++){var key=d.toISOString().slice(0,10);var n=s.days[key]||0;var cls=n===0?'':(n<=2?'d1':(n<=4?'d2':(n<=6?'d3':(n<=8?'d4':'d5'))));html+='<div class="hm-day '+cls+'" title="'+key+': '+n+' 题"></div>';d.setDate(d.getDate()+1)}
+  $('heatmap').innerHTML=html;
+}
+
+/* ============ 导航 ============ */
+function resetTranscript(){$('transcriptBox').textContent='还没有内容。点「AI 反馈」会先让你说话并转写，然后自动评分。也可以直接在这里输入你的答案。';var tip=$('transcriptBox').parentNode.querySelector('.stt-tip');if(tip)tip.remove();$('transcriptBox').removeAttribute('contenteditable');$('transcriptBox').style.border=''}
+function nextQ(){stopSpeak();stopRecognition();clearTimers();resetTranscript();$('timerBox').classList.remove('show');if(mode==='seq'){if(part===1){p1q++;if(p1q>=bank.P1[p1i].qs.length){p1q=0;p1i=(p1i+1)%bank.P1.length}}else if(part===2){p2i=(p2i+1)%bank.P2.length}else{p3q++;if(p3q>=bank.P2[p3i].p3.length){p3q=0;p3i=(p3i+1)%bank.P2.length}}}else{if(part===1){p1i=Math.floor(Math.random()*bank.P1.length);p1q=Math.floor(Math.random()*bank.P1[p1i].qs.length)}else if(part===2){p2i=Math.floor(Math.random()*bank.P2.length)}else{p3i=Math.floor(Math.random()*bank.P2.length);p3q=Math.floor(Math.random()*bank.P2[p3i].p3.length)}}updUI();buildTopicList();autoAsk()}
+function selPart(p){stopSpeak();stopRecognition();clearTimers();resetTranscript();part=p;Array.prototype.forEach.call($('tabs').querySelectorAll('.tb'),function(b){b.classList.toggle('on',parseInt(b.getAttribute('data-part'),10)===p)});$('timerBox').classList.remove('show');updUI();buildTopicList();autoAsk()}
+function setMode(m){mode=m;$('mSeq').classList.toggle('on',m==='seq');$('mRand').classList.toggle('on',m==='rand');}
+
+/* ============ 设置 ============ */
+function loadSettings(){var raw=localStorage.getItem('ielts:settings');if(raw){try{var s=JSON.parse(raw);for(var k in s)settings[k]=s[k]}catch(e){}}}
+function populateVoiceSelect(){
+  var sel=$('inpVoice');if(!sel)return;
+  var v=synth.getVoices();var en=[];for(var i=0;i<v.length;i++)if(/^en/i.test(v[i].lang))en.push(v[i]);
+  sel.innerHTML='<option value="">自动选择</option>';
+  for(var j=0;j<en.length;j++){var o=document.createElement('option');o.value=en[j].name;o.textContent=en[j].name+'（'+en[j].lang+'）';sel.appendChild(o)}
+  sel.value=settings.voice||'';
+}
+function saveSettings(){settings.key=$('inpKey').value.trim();settings.stt=$('inpSTT').value;settings.rate=$('inpRate').value;settings.voice=$('inpVoice').value;settings.autoRead=$('inpAutoRead').checked;localStorage.setItem('ielts:settings',JSON.stringify(settings));$('settingsModal').classList.remove('show');toast('设置已保存')}
+
+/* ============ 事件绑定 ============ */
+Array.prototype.forEach.call($('tabs').querySelectorAll('.tb'),function(b){
+  b.addEventListener('click',function(){selPart(parseInt(b.getAttribute('data-part'),10))});
+});
+$('btnAsk').onclick=askQ;
+$('btnRec').onclick=toggleRec;
+$('btnAI').onclick=runAI;
+$('btnNext').onclick=nextQ;
+$('btnList').onclick=function(){$('topicPanel').classList.toggle('show');buildTopicList()};
+$('btnAIClose').onclick=function(){$('aiPanel').classList.remove('show')};
+$('btnRecsClose').onclick=function(){$('recsPanel').classList.remove('show')};
+$('btnTopicClose').onclick=function(){$('topicPanel').classList.remove('show')};
+$('mSeq').onclick=function(){setMode('seq')};
+$('mRand').onclick=function(){setMode('rand')};
+$('btnSettings').onclick=function(){$('inpKey').value=settings.key;$('inpSTT').value=settings.stt;$('inpRate').value=settings.rate;$('inpAutoRead').checked=settings.autoRead!==false;populateVoiceSelect();$('settingsModal').classList.add('show');updateSTTHint()};
+$('btnSaveSettings').onclick=saveSettings;
+$('btnExport').onclick=function(){download('ielts-bank-'+Date.now()+'.json',JSON.stringify(window.bank,null,2))};
+$('btnResetBank').onclick=resetBank;
+$('btnExportData').onclick=function(){download('ielts-stats-'+Date.now()+'.json',JSON.stringify(loadStats(),null,2))};
+$('btnClearData').onclick=function(){if(confirm('确定清空所有练习记录和录音索引吗？')){localStorage.removeItem('ielts:stats');renderStats();toast('已清空')}};
+$('inpBankFile').addEventListener('change',function(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(){try{var b=JSON.parse(r.result);if(!b.P1||!b.P2){toast('格式不对：需要 P1 和 P2 字段');return}saveBank(b);applyBank();toast('已导入题库：'+b.season)}catch(err){toast('JSON 解析失败')}};r.readAsText(f)});
+$('topicSearch').addEventListener('input',function(){var q=this.value.toLowerCase();Array.prototype.forEach.call($('topicList').querySelectorAll('.topicrow'),function(r){r.style.display=r.textContent.toLowerCase().indexOf(q)!==-1?'':'none'})});
+document.addEventListener('keydown',function(e){
+  if(e.target.tagName==='INPUT'||e.target.tagName==='TEXTAREA'||e.target.getAttribute('contenteditable'))return;
+  if(e.key===' '){e.preventDefault();askQ()}
+  else if(e.key==='ArrowRight'){e.preventDefault();nextQ()}
+  else if(e.key==='r'||e.key==='R'){e.preventDefault();toggleRec()}
+  else if(e.key==='1')selPart(1);else if(e.key==='2')selPart(2);else if(e.key==='3')selPart(3);
+  else if(e.key==='m'||e.key==='M')setMode(mode==='seq'?'rand':'seq');
+});
+function download(name,content){var a=document.createElement('a');a.href=URL.createObjectURL(new Blob([content],{type:'application/json'}));a.download=name;a.click();URL.revokeObjectURL(a.href)}
+
+/* ============ 初始化 ============ */
+loadSettings();applyBank();renderStats();updateSTTHint();
+// 注册 Service Worker（部署到 https 后生效）
+if('serviceWorker' in navigator&&location.protocol!=='file:'){navigator.serviceWorker.register('sw.js').catch(function(){})}
+</script>
+</body>
+</html>

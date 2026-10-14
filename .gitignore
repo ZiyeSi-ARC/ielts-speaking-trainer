@@ -1,0 +1,4 @@
+.DS_Store
+node_modules/
+*.pic.jpg
+截屏*.png
